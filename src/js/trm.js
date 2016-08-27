@@ -19,13 +19,20 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     this.accounts = [];
     this.referentials = {
         'quantitative': {
-            name: "Quantitative"
+            name: "Quantitative",
+            formula: null
         },
-        'relative_dub_t': {
-            name: "Relative UDB(t)"
+        'relative_uda_t': {
+            name: "Relative UDA(t)",
+            formula: "UDA"
         },
-        'relative_dub_t_plus_1': {
-            name: "Relative UDB(t+1)"
+        'relative_udb_t': {
+            name: "Relative UDB(t)",
+            formula: "UDB"
+        },
+        'relative_udb_t_plus_1': {
+            name: "Relative UDB(t+1)",
+            formula: "UDB"
         }
     };
 
@@ -49,6 +56,25 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
     this.calc_growth = function() {
         this.growth = Math.log(this.life_expectancy/2) / (this.life_expectancy/2);
+    };
+
+    this.get_people = function(index) {
+        var people = 0;
+
+        // for each account...
+        for (var index_account = 0; index_account < this.accounts.length; index_account++) {
+
+            // if account is born...
+            if (index >= this.accounts[index_account].birth) {
+                // if account is alive...
+                if (index >= this.accounts[index_account].birth && index < this.accounts[index_account].birth + this.life_expectancy) {
+                    // increment people count
+                    people++;
+                }
+            }
+        }
+
+        return people;
     };
 
 	this.add_account = function(name, birth) {
@@ -102,17 +128,27 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             this.monetary_mass.x.push(index);
             this.average.x.push(index);
 
+            // get current people count
+            people = this.get_people(index);
+
             // after first issuance, increase dividend by growth...
             if (index > 1) {
-                // DUB formula
-                dividend = Math.ceil(this.dividends.y[this.dividends.y.length - 1] * (1 + this.growth));
+
+                // UDA formula
+                if (this.referentials[this.referential].formula == 'UDA') {
+                    if (people > 0) {
+                        dividend = Math.max(this.dividends.y[this.dividends.y.length - 1], this.growth * (this.monetary_mass.y[this.monetary_mass.y.length - 1] / people));
+                    } else {
+                        dividend = this.dividends.y[this.dividends.y.length - 1];
+                    }
+                } else { // UDB formula
+                    dividend = Math.ceil(this.dividends.y[this.dividends.y.length - 1] * (1 + this.growth));
+                }
             }
 
             this.dividends.y.push(dividend);
             this.dividends.display_y.push(this.get_referential_value(dividend));
 
-            // reset people count
-            people = 0;
             monetary_mass = 0;
             average = 0;
             // for each account...
@@ -124,8 +160,6 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                     if (index >= this.accounts[index_account].birth && index < this.accounts[index_account].birth + this.life_expectancy) {
                         // add a dividend to the account balance
                         this.accounts[index_account].balance += this.dividends.y[this.dividends.y.length - 1];
-                        // increment people count
-                        people++;
                     }
                     // add x value
                     this.accounts[index_account].x.push(index);
@@ -197,12 +231,16 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             case 'quantitative':
                 value = units;
                 break;
-            // Relative to UD(t)
-            case 'relative_dub_t':
+            // Relative to UDA(t)
+            case 'relative_uda_t':
                 value = units / this.dividends.y[this.dividends.y.length - 1];
                 break;
-            // Relative to UD(t+1)
-            case 'relative_dub_t_plus_1':
+            // Relative to UDB(t)
+            case 'relative_udb_t':
+                value = units / this.dividends.y[this.dividends.y.length - 1];
+                break;
+            // Relative to UDB(t+1)
+            case 'relative_udb_t_plus_1':
                 value = units / (this.dividends.y[this.dividends.y.length - 1] * ( 1 + this.growth));
                 break;
         }
