@@ -1,0 +1,9 @@
+.title {
+    font-size: large;
+    margin: 1em;
+    text-align: center;
+}
+
+input {
+    text-align: right;
+}
