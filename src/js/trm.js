@@ -20,23 +20,38 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     this.referentials = {
         'quantitative_uda': {
             name: "Quantitative UDA",
-            formula: "UDA"
+            formula: "UDA",
+            transform: function(money, value) {
+                return value;
+            }
         },
         'quantitative_udb': {
             name: "Quantitative UDB",
-            formula: "UDB"
+            formula: "UDB",
+            transform: function(money, value) {
+                return value;
+            }
         },
         'relative_uda_t': {
             name: "Relative UDA(t)",
-            formula: "UDA"
+            formula: "UDA",
+            transform: function(money, value) {
+                return value / money.dividends.y[money.dividends.y.length - 1];
+            }
         },
         'relative_udb_t': {
             name: "Relative UDB(t)",
-            formula: "UDB"
+            formula: "UDB",
+            transform: function(money, value) {
+                return value / money.dividends.y[money.dividends.y.length - 1];
+            }
         },
         'relative_udb_t_plus_1': {
             name: "Relative UDB(t+1)",
-            formula: "UDB"
+            formula: "UDB",
+            transform: function(money, value) {
+                return value / (money.dividends.y[money.dividends.y.length - 1] * ( 1 + money.growth));
+            }
         }
     };
 
@@ -224,36 +239,11 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     /**
      * Transform data to another referential
      *
-     * @param units {int}   Quantitative units
+     * @param value {int}   Source value
      * @returns {number|*}
      */
-    this.get_referential_value = function (units) {
-        var value = null;
-
-        switch (this.referential) {
-            // Quantitative UDA
-            case 'quantitative_uda':
-                value = units;
-                break;
-            // Quantitative
-            case 'quantitative_udb':
-                value = units;
-                break;
-            // Relative to UDA(t)
-            case 'relative_uda_t':
-                value = units / this.dividends.y[this.dividends.y.length - 1];
-                break;
-            // Relative to UDB(t)
-            case 'relative_udb_t':
-                value = units / this.dividends.y[this.dividends.y.length - 1];
-                break;
-            // Relative to UDB(t+1)
-            case 'relative_udb_t_plus_1':
-                value = units / (this.dividends.y[this.dividends.y.length - 1] * ( 1 + this.growth));
-                break;
-        }
-
-        return value;
+    this.get_referential_value = function (value) {
+        return this.referentials[this.referential].transform(this, value);
     }
 
 };
