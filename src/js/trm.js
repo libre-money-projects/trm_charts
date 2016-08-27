@@ -22,11 +22,11 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'quantitative': {
             name: "Quantitative"
         },
-        'relative_du_t': {
-            name: "Relative UD(t)"
+        'relative_dub_t': {
+            name: "Relative UDB(t)"
         },
-        'relative_du_t_plus_1': {
-            name: "Relative UD(t+1)"
+        'relative_dub_t_plus_1': {
+            name: "Relative UDB(t+1)"
         }
     };
 
@@ -134,11 +134,11 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 value = units;
                 break;
             // Relative to UD(t)
-            case 'relative_du_t':
+            case 'relative_dub_t':
                 value = units / this.dividends.y[this.dividends.y.length - 1];
                 break;
             // Relative to UD(t+1)
-            case 'relative_du_t_plus_1':
+            case 'relative_dub_t_plus_1':
                 value = units / (this.dividends.y[this.dividends.y.length - 1] * ( 1 + this.growth));
                 break;
         }
