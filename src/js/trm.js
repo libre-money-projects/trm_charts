@@ -18,9 +18,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     this.growth = null;
     this.accounts = [];
     this.referentials = {
-        'quantitative': {
-            name: "Quantitative",
-            formula: null
+        'quantitative_uda': {
+            name: "Quantitative UDA",
+            formula: "UDA"
+        },
+        'quantitative_udb': {
+            name: "Quantitative UDB",
+            formula: "UDB"
         },
         'relative_uda_t': {
             name: "Relative UDA(t)",
@@ -36,7 +40,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         }
     };
 
-    this.referential = 'quantitative';
+    this.referential = 'quantitative_uda';
 
     this.reset_dividends = function () {
         this.dividends = {x: [], y : [], display_y: []};
@@ -227,8 +231,12 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         var value = null;
 
         switch (this.referential) {
+            // Quantitative UDA
+            case 'quantitative_uda':
+                value = units;
+                break;
             // Quantitative
-            case 'quantitative':
+            case 'quantitative_udb':
                 value = units;
                 break;
             // Relative to UDA(t)
