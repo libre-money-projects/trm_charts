@@ -39,6 +39,10 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         this.people = {x: [], y : []};
     };
 
+    this.reset_monetary_mass = function () {
+        this.monetary_mass = {x: [], y : [], display_y: []};
+    };
+
     this.calc_growth = function() {
         this.growth = Math.log(this.life_expectancy/2) / (this.life_expectancy/2);
     };
@@ -52,6 +56,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         // init data
         this.reset_dividends();
         this.reset_people();
+        this.reset_monetary_mass();
 
         // calculate growth
         this.calc_growth();
@@ -60,13 +65,14 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 		var data = {
 			xs: {
                 'dividend': 'x_dividend',
-                'people': 'x_people'
+                'people': 'x_people',
+                'monetary_mass': 'x_monetary_mass'
             },
 			columns: []
 		};
 
         var index_account, index;
-
+        // For each account...
 		for (index_account = 0; index_account < this.accounts.length; index_account++) {
 			// add axis mapping
 			data.xs[this.accounts[index_account].name] = 'x' + index_account;
@@ -77,11 +83,10 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             this.accounts[index_account].y = [];
 		}
 
-        this.reset_dividends();
-        this.reset_people();
-
         var dividend = this.dividend_start;
         var people = 0;
+        var monetary_mass = 0;
+
         // for each dividend issuance...
 		for (index = 1; index <= this.money_duration; index++) {
 
@@ -90,6 +95,9 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
             // add time to people x axis
             this.people.x.push(index);
+
+            // add time to monetary_mass x axis
+            this.monetary_mass.x.push(index);
 
             // after first issuance, increase dividend by growth...
             if (index > 1) {
@@ -102,7 +110,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
             // reset people count
             people = 0;
-
+            monetary_mass = 0;
             // for each account...
             for (index_account = 0; index_account < this.accounts.length; index_account++) {
 
@@ -120,10 +128,16 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                     // add y value
                     this.accounts[index_account].y.push(this.get_referential_value(this.accounts[index_account].balance));
                 }
+                // increment monetary mass
+                monetary_mass += this.accounts[index_account].balance;
             }
 
             // add people count
             this.people.y.push(people);
+
+            // add monetary_mass
+            this.monetary_mass.y.push(monetary_mass);
+            this.monetary_mass.display_y.push(this.get_referential_value(monetary_mass));
 		}
 
         // add axis header to data
@@ -131,12 +145,16 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         this.dividends.display_y.unshift('dividend');
         this.people.x.unshift('x_people');
         this.people.y.unshift('people');
+        this.monetary_mass.x.unshift('x_monetary_mass');
+        this.monetary_mass.display_y.unshift('monetary_mass');
 
         // add data to columns
         data.columns.push(this.dividends.x);
         data.columns.push(this.dividends.display_y);
         data.columns.push(this.people.x);
         data.columns.push(this.people.y);
+        data.columns.push(this.monetary_mass.x);
+        data.columns.push(this.monetary_mass.display_y);
 
         // for each account...
         for (index_account = 0; index_account < this.accounts.length; index_account++) {
