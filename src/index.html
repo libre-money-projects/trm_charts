@@ -33,6 +33,7 @@
 <div class="title">Relative Theory of Money Charts</div>
 
 <form>
+    <div>
     <label for="life_expectancy">Life Expectancy</label>
     <input id="life_expectancy" type="text" value="80" name="life_expectancy"/>
     <label for="dividend_start">First Dividend</label>
@@ -43,6 +44,9 @@
     <select id="display_referential" name="money_duration"></select>
 
     <input id="generate_button" type="button" value="Update" name="generate_button">
+    </div>
+    <input id="delete_last_account" type="button" value="Delete Last Account"/>
+
 </form>
 
 <div id="chart" style="border: solid 1px gray"></div>
@@ -82,7 +86,7 @@
                     new Option(referentials[key].name, key)
                 );
             }
-        }
+        };
     };
 
     // create instance form handler
@@ -108,9 +112,6 @@
 
     // add a member account
     money.add_account('member 3', 30);
-
-    // add a member account
-    money.add_account('member 4', 40);
 
     // generate data
     var data = money.get_data();
@@ -144,8 +145,20 @@
         });
     }
 
+    /**
+     * Delete last account
+     */
+    function delete_last_account() {
+
+        var account = money.delete_last_account();
+        chart.unload({
+          ids: account.name
+        });
+    }
+
     document.getElementById('generate_button').addEventListener('click', update);
     document.getElementById('display_referential').addEventListener('change', update);
+    document.getElementById('delete_last_account').addEventListener('click', delete_last_account);
 </script>
 
 <!--

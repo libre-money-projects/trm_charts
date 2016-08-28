@@ -100,6 +100,11 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 		this.accounts.push({name: name, birth: birth, balance: 0, x: [], y: []});
 	};
 
+    this.delete_last_account = function() {
+		return this.accounts.pop();
+        //console.log(this.accounts);
+	};
+
     this.get_data = function () {
 
         // init data
