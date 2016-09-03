@@ -33,22 +33,37 @@
 <div class="title">Relative Theory of Money Charts</div>
 
 <form>
-    <label for="reference_frame">Reference Frame</label><select id="reference_frame" name="money_duration"></select>
-
-    <div>
-        <label for="life_expectancy">Life Expectancy</label><input id="life_expectancy" type="text" value="80" name="life_expectancy"/>
-        <label for="dividend_start">First Dividend</label><input id="dividend_start" type="text" value="1000" name="dividend_start"/>
-        <label for="money_duration">Money Duration</label><input id="money_duration" type="text" value="160" name="money_duration"/>
+    <div class="frame">
+        <div class="row">
+            <label for="life_expectancy">Life Expectancy</label>
+            <input id="life_expectancy" type="text" value="80" name="life_expectancy"/>
+            <span>Years</span>
+        </div>
+        <div class="row">
+            <label for="dividend_start">First Dividend</label>
+            <input id="dividend_start" type="text" value="1000" name="dividend_start"/>
+            <span>Units</span>
+        </div>
+        <div class="row">
+            <label for="money_duration">Money Duration</label>
+            <input id="money_duration" type="text" value="160" name="money_duration"/>
+            <span>Years</span>
+        </div>
         <input id="generate_button" type="button" value="Update" name="generate_button">
     </div>
-    <div>
-        <label for="new_account_birth">New Member Birth Year</label><input id="new_account_birth" type="text" value="1"/>
-        <input id="add_account" type="button" value="Add Member"/>
+    <div class="frame">
+        <label for="new_account_birth">New member birth year</label><input id="new_account_birth" type="text"
+                                                                           value="1"/>
+        <input id="add_account" type="button" value="New Member"/>
         <input id="delete_last_account" type="button" value="Delete Last Member"/>
     </div>
+    <div class="frame">
+        <label for="reference_frame">Reference Frame</label><select id="reference_frame" name="money_duration"></select>
+    </div>
+
 </form>
 
-<div id="chart" style="border: solid 1px gray"></div>
+<div id="chart" class="frame"></div>
 
 <script type="application/javascript">
 
@@ -121,13 +136,13 @@
             }
         },
         tooltip: {
-                format: {
-                    value: function (value, ratio, id, index) {
-                        var f = d3.format('.2f');
-                        return f(value);
-                    }
+            format: {
+                value: function (value, ratio, id, index) {
+                    var f = d3.format('.2f');
+                    return f(value);
                 }
-            },
+            }
+        },
         data: data
     });
 

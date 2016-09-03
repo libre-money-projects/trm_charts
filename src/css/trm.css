@@ -4,6 +4,33 @@
     text-align: center;
 }
 
-input {
+body {
+        color: darkslateblue;
+
+}
+
+input,select,label {
     text-align: right;
+    margin:5px;
+}
+
+form {
+    width: 50%;
+}
+
+label {
+    display: inline-block;
+    width: 15%;
+    color: darkslateblue;
+}
+
+.row {
+    width: 100%;
+}
+
+.frame {
+    margin: 5px;
+    border: solid 1px;
+    border-color: grey;
+    border-radius: 5px;
 }
