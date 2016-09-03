@@ -32,6 +32,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 return value;
             }
         },
+        'quantitative_udg': {
+            name: "Quantitative UDĞ",
+            formula: "UDG",
+            transform: function(money, value) {
+                return value;
+            }
+        },
         'relative_uda_t': {
             name: "Relative UDA(t)",
             formula: "UDA",
@@ -51,6 +58,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             formula: "UDB",
             transform: function(money, value) {
                 return value / (money.dividends.y[money.dividends.y.length - 1] * ( 1 + money.growth));
+            }
+        },
+        'relative_udg_t': {
+            name: "Relative UDĞ(t)",
+            formula: "UDG",
+            transform: function(money, value) {
+                return value / money.dividends.y[money.dividends.y.length - 1];
             }
         }
     };
@@ -100,9 +114,16 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 		this.accounts.push({name: name, birth: birth, balance: 0, x: [], y: []});
 	};
 
+    /**
+     * Return account deleted or false if only one account left
+     *
+     * @returns {*}|false
+     */
     this.delete_last_account = function() {
-		return this.accounts.pop();
-        //console.log(this.accounts);
+        if (this.accounts.length > 1) {
+            return this.accounts.pop();
+        }
+        return false;
 	};
 
     this.get_data = function () {
@@ -131,7 +152,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         // For each account...
 		for (index_account = 0; index_account < this.accounts.length; index_account++) {
 			// add axis mapping
-			data.xs[this.accounts[index_account].name] = 'x' + index_account;
+			data.xs[this.accounts[index_account].name] = 'x_' + this.accounts[index_account].name;
 
             // reset data
             this.accounts[index_account].balance = 0;
@@ -165,8 +186,15 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                     } else {
                         dividend = this.dividends.y[this.dividends.y.length - 1];
                     }
-                } else { // UDB formula
+                    // UDB formula
+                } else if (this.referentials[this.referential].formula == 'UDB') {
                     dividend = Math.ceil(this.dividends.y[this.dividends.y.length - 1] * (1 + this.growth));
+                } else if (this.referentials[this.referential].formula == 'UDG') {
+                    if (people > 0) {
+                        dividend = this.dividends.y[this.dividends.y.length - 1] + (Math.pow(this.growth, 2) * (this.monetary_mass.y[this.monetary_mass.y.length - 1] / people))
+                    } else {
+                        dividend = this.dividends.y[this.dividends.y.length - 1];
+                    }
                 }
             }
 

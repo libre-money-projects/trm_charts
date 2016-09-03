@@ -131,7 +131,10 @@
 
         // calculate data
         var data = money.get_data();
-        //console.log(data);
+
+        // tell load command to unload old data
+        data.unload = true;
+
         // reload data in chart
         chart.load(data);
     }
@@ -140,11 +143,12 @@
      * Delete last account
      */
     function delete_last_account() {
-
         var account = money.delete_last_account();
-        chart.unload({
-          ids: account.name
-        });
+        // If account deleted...
+        if (account != false) {
+            // Update remaining data
+            update();
+        }
     }
 
     /**
