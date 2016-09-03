@@ -21,6 +21,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'quantitative_uda': {
             name: "Quantitative UDA",
             formula: "UDA",
+            unit_label: 'Units',
             transform: function(money, value) {
                 return value;
             }
@@ -28,6 +29,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'quantitative_udb': {
             name: "Quantitative UDB",
             formula: "UDB",
+            unit_label: 'Units',
             transform: function(money, value) {
                 return value;
             }
@@ -35,6 +37,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'quantitative_udg': {
             name: "Quantitative UDĞ",
             formula: "UDG",
+            unit_label: 'Units',
             transform: function(money, value) {
                 return value;
             }
@@ -42,6 +45,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'relative_uda_t': {
             name: "Relative UDA(t)",
             formula: "UDA",
+            unit_label: 'UDA(t)',
             transform: function(money, value) {
                 return value / money.dividends.y[money.dividends.y.length - 1];
             }
@@ -49,6 +53,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'relative_udb_t': {
             name: "Relative UDB(t)",
             formula: "UDB",
+            unit_label: 'UDB(t)',
             transform: function(money, value) {
                 return value / money.dividends.y[money.dividends.y.length - 1];
             }
@@ -56,6 +61,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'relative_udb_t_plus_1': {
             name: "Relative UDB(t+1)",
             formula: "UDB",
+            unit_label: 'UDB(t+1)',
             transform: function(money, value) {
                 return value / (money.dividends.y[money.dividends.y.length - 1] * ( 1 + money.growth));
             }
@@ -63,6 +69,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         'relative_udg_t': {
             name: "Relative UDĞ(t)",
             formula: "UDG",
+            unit_label: 'UDĞ(t)',
             transform: function(money, value) {
                 return value / money.dividends.y[money.dividends.y.length - 1];
             }
@@ -145,8 +152,14 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 'monetary_mass': 'x_monetary_mass',
                 'average': 'x_average'
             },
+            names: {
+                'dividend': 'Dividend',
+                'people': 'People',
+                'monetary_mass': 'Monetary Mass',
+                'average': 'Average'
+            },
 			columns: []
-		};
+        };
 
         var index_account, index;
         // For each account...
@@ -205,6 +218,8 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             average = 0;
             // for each account...
             for (index_account = 0; index_account < this.accounts.length; index_account++) {
+
+                data.names[this.accounts[index_account].name] = 'Member ' + index_account;
 
                 // if account is born...
                 if (index >= this.accounts[index_account].birth) {

@@ -112,6 +112,22 @@
     // create and display chart from data
     chart = c3.generate({
         bindto: '#chart',
+        axis: {
+            x: {
+                label: 'Year'
+            },
+            y: {
+                label: money.referentials[money.referential].unit_label
+            }
+        },
+        tooltip: {
+                format: {
+                    value: function (value, ratio, id, index) {
+                        var f = d3.format('.2f');
+                        return f(value);
+                    }
+                }
+            },
         data: data
     });
 
@@ -128,6 +144,11 @@
         money.dividend_start = money_form.dividend_start;
         money.money_duration = money_form.money_duration;
         money.referential = money_form.referential;
+
+        // Axes
+        chart.axis.labels({
+            y: money.referentials[money.referential].unit_label
+        });
 
         // calculate data
         var data = money.get_data();
