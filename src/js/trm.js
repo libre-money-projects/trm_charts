@@ -118,7 +118,14 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     };
 
 	this.add_account = function(name, birth) {
-		this.accounts.push({name: name, birth: birth, balance: 0, x: [], y: []});
+		this.accounts.push({
+            name: name,
+            id: 'member_' + (this.accounts.length + 1),
+            birth: birth,
+            balance: 0,
+            x: [],
+            y: []
+        });
 	};
 
     /**
@@ -165,7 +172,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         // For each account...
 		for (index_account = 0; index_account < this.accounts.length; index_account++) {
 			// add axis mapping
-			data.xs[this.accounts[index_account].name] = 'x_' + this.accounts[index_account].name;
+			data.xs[this.accounts[index_account].id] = 'x_' + this.accounts[index_account].name;
 
             // reset data
             this.accounts[index_account].balance = 0;
@@ -219,7 +226,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             // for each account...
             for (index_account = 0; index_account < this.accounts.length; index_account++) {
 
-                data.names[this.accounts[index_account].name] = 'Member ' + index_account;
+                data.names[this.accounts[index_account].id] = this.accounts[index_account].name;
 
                 // if account is born...
                 if (index >= this.accounts[index_account].birth) {
@@ -275,8 +282,8 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         // for each account...
         for (index_account = 0; index_account < this.accounts.length; index_account++) {
             // add axis header to data
-            this.accounts[index_account].x.unshift(data.xs[this.accounts[index_account].name]);
-            this.accounts[index_account].y.unshift(this.accounts[index_account].name);
+            this.accounts[index_account].x.unshift(data.xs[this.accounts[index_account].id]);
+            this.accounts[index_account].y.unshift(this.accounts[index_account].id);
             // add data to columns
             data.columns.push(this.accounts[index_account].x);
             data.columns.push(this.accounts[index_account].y);

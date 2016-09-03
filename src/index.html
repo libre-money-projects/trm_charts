@@ -104,7 +104,7 @@
     money_form.set_referentials(money.referentials);
 
     // add a member account
-    money.add_account('member 1', 1);
+    money.add_account('Member 1', 1);
 
     // generate data
     var data = money.get_data();
@@ -177,7 +177,7 @@
      */
     function add_account() {
         // construct name
-        var name = 'member ' + (money.accounts.length + 1)
+        var name = 'Member ' + (money.accounts.length + 1)
 
         // add a member account at the birth date specified
         money.add_account(name, parseInt(document.getElementById('new_account_birth').value));
