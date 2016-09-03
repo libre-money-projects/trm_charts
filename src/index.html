@@ -40,6 +40,11 @@
             <span>Years</span>
         </div>
         <div class="row">
+            <label for="growth">Growth</label>
+            <input id="growth" type="text" value="80" name="life_expectancy" disabled="disabled"/>
+            <span>% / Year</span>
+        </div>
+        <div class="row">
             <label for="dividend_start">First Dividend</label>
             <input id="dividend_start" type="text" value="1000" name="dividend_start"/>
             <span>Units</span>
@@ -86,7 +91,7 @@
                 ].value;
         };
 
-        this.set_data = function () {
+        this.init = function () {
             document.getElementById('life_expectancy').value = this.life_expectancy;
             document.getElementById('dividend_start').value = this.dividend_start;
             document.getElementById('money_duration').value = this.money_duration;
@@ -101,6 +106,12 @@
                 );
             }
         };
+
+        // update dynamic values in form
+        this.update = function () {
+            // calculated growth
+            document.getElementById('growth').value = (money.growth * 100).toFixed(2);
+        }
     };
 
     // create instance form handler
@@ -108,7 +119,7 @@
     gui_form_class.call(money_form);
 
     // fill form with preset data
-    money_form.set_data();
+    money_form.init();
 
     // Create instance context
     var money = {};
@@ -123,6 +134,9 @@
 
     // generate data
     var data = money.get_data();
+
+    // update dynamic values in form
+    money_form.update();
 
     // create and display chart from data
     chart = c3.generate({
@@ -167,6 +181,9 @@
 
         // calculate data
         var data = money.get_data();
+
+        // update dynamic values in form
+        money_form.update();
 
         // tell load command to unload old data
         data.unload = true;
