@@ -33,7 +33,7 @@
 <div class="title">Relative Theory of Money Charts</div>
 
 <form>
-    <label for="display_referential">Referential</label><select id="display_referential" name="money_duration"></select>
+    <label for="reference_frame">Reference Frame</label><select id="reference_frame" name="money_duration"></select>
 
     <div>
         <label for="life_expectancy">Life Expectancy</label><input id="life_expectancy" type="text" value="80" name="life_expectancy"/>
@@ -60,14 +60,14 @@
         this.life_expectancy = 80;
         this.dividend_start = 1000;
         this.money_duration = 160;
-        this.referential = 'quantitative_uda';
+        this.reference_frame = 'quantitative_uda';
 
         this.get_data = function () {
             this.life_expectancy = parseInt(document.getElementById('life_expectancy').value);
             this.dividend_start = parseInt(document.getElementById('dividend_start').value);
             this.money_duration = parseInt(document.getElementById('money_duration').value);
-            this.referential = document.getElementById('display_referential').options[
-                document.getElementById('display_referential').selectedIndex
+            this.reference_frame = document.getElementById('reference_frame').options[
+                document.getElementById('reference_frame').selectedIndex
                 ].value;
         };
 
@@ -77,12 +77,12 @@
             document.getElementById('money_duration').value = this.money_duration;
         };
 
-        this.set_referentials = function (referentials) {
-            document.getElementById('display_referential').options = [];
-            for (var index in Object.getOwnPropertyNames(referentials)) {
-                var key = Object.getOwnPropertyNames(referentials)[index];
-                document.getElementById('display_referential').add(
-                    new Option(referentials[key].name, key)
+        this.set_reference_frames = function (reference_frames) {
+            document.getElementById('reference_frame').options = [];
+            for (var index in Object.getOwnPropertyNames(reference_frames)) {
+                var key = Object.getOwnPropertyNames(reference_frames)[index];
+                document.getElementById('reference_frame').add(
+                    new Option(reference_frames[key].name, key)
                 );
             }
         };
@@ -100,8 +100,8 @@
     // Create instance of class in context with constructor parameters
     libre_money_class.call(money, money_form.life_expectancy, money_form.dividend_start, money_form.money_duration);
 
-    // capture referentials list
-    money_form.set_referentials(money.referentials);
+    // capture reference_frames list
+    money_form.set_reference_frames(money.reference_frames);
 
     // add a member account
     money.add_account('Member 1', 1);
@@ -117,7 +117,7 @@
                 label: 'Year'
             },
             y: {
-                label: money.referentials[money.referential].unit_label
+                label: money.reference_frames[money.reference_frame].unit_label
             }
         },
         tooltip: {
@@ -143,11 +143,11 @@
         money.life_expectancy = money_form.life_expectancy;
         money.dividend_start = money_form.dividend_start;
         money.money_duration = money_form.money_duration;
-        money.referential = money_form.referential;
+        money.reference_frame = money_form.reference_frame;
 
         // Axes
         chart.axis.labels({
-            y: money.referentials[money.referential].unit_label
+            y: money.reference_frames[money.reference_frame].unit_label
         });
 
         // calculate data
@@ -186,7 +186,7 @@
     }
 
     document.getElementById('generate_button').addEventListener('click', update);
-    document.getElementById('display_referential').addEventListener('change', update);
+    document.getElementById('reference_frame').addEventListener('change', update);
 
     document.getElementById('add_account').addEventListener('click', add_account);
     document.getElementById('delete_last_account').addEventListener('click', delete_last_account);

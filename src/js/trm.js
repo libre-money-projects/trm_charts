@@ -17,7 +17,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
     this.growth = null;
     this.accounts = [];
-    this.referentials = {
+    this.reference_frames = {
         'quantitative_uda': {
             name: "Quantitative UDA",
             formula: "UDA",
@@ -76,7 +76,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         }
     };
 
-    this.referential = 'quantitative_uda';
+    this.reference_frame = 'quantitative_uda';
 
     this.reset_dividends = function () {
         this.dividends = {x: [], y : [], display_y: []};
@@ -200,16 +200,16 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             if (index > 1) {
 
                 // UDA formula
-                if (this.referentials[this.referential].formula == 'UDA') {
+                if (this.reference_frames[this.reference_frame].formula == 'UDA') {
                     if (people > 0) {
                         dividend = Math.max(this.dividends.y[this.dividends.y.length - 1], this.growth * (this.monetary_mass.y[this.monetary_mass.y.length - 1] / people));
                     } else {
                         dividend = this.dividends.y[this.dividends.y.length - 1];
                     }
                     // UDB formula
-                } else if (this.referentials[this.referential].formula == 'UDB') {
+                } else if (this.reference_frames[this.reference_frame].formula == 'UDB') {
                     dividend = Math.ceil(this.dividends.y[this.dividends.y.length - 1] * (1 + this.growth));
-                } else if (this.referentials[this.referential].formula == 'UDG') {
+                } else if (this.reference_frames[this.reference_frame].formula == 'UDG') {
                     if (people > 0) {
                         dividend = this.dividends.y[this.dividends.y.length - 1] + (Math.pow(this.growth, 2) * (this.monetary_mass.y[this.monetary_mass.y.length - 1] / people))
                     } else {
@@ -219,7 +219,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             }
 
             this.dividends.y.push(dividend);
-            this.dividends.display_y.push(this.get_referential_value(dividend));
+            this.dividends.display_y.push(this.get_reference_frame_value(dividend));
 
             monetary_mass = 0;
             average = 0;
@@ -238,7 +238,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                     // add x value
                     this.accounts[index_account].x.push(index);
                     // add y value
-                    this.accounts[index_account].y.push(this.get_referential_value(this.accounts[index_account].balance));
+                    this.accounts[index_account].y.push(this.get_reference_frame_value(this.accounts[index_account].balance));
                 }
                 // increment monetary mass
                 monetary_mass += this.accounts[index_account].balance;
@@ -252,11 +252,11 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
             // add monetary_mass
             this.monetary_mass.y.push(monetary_mass);
-            this.monetary_mass.display_y.push(this.get_referential_value(monetary_mass));
+            this.monetary_mass.display_y.push(this.get_reference_frame_value(monetary_mass));
 
             // add average
             this.average.y.push(average);
-            this.average.display_y.push(this.get_referential_value(average));
+            this.average.display_y.push(this.get_reference_frame_value(average));
 		}
 
         // add axis header to data
@@ -292,13 +292,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     };
 
     /**
-     * Transform data to another referential
+     * Transform data to another reference_frame
      *
      * @param value {int}   Source value
      * @returns {number|*}
      */
-    this.get_referential_value = function (value) {
-        return this.referentials[this.referential].transform(this, value);
+    this.get_reference_frame_value = function (value) {
+        return this.reference_frames[this.reference_frame].transform(this, value);
     }
 
 };
