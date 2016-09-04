@@ -161,6 +161,9 @@
         tooltip: {
             format: {
                 value: function (value, ratio, id, index) {
+                    if (id == 'people') {
+                        return value;
+                    }
                     var f = d3.format('.2f');
                     return f(value);
                 }
