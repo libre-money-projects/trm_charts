@@ -36,29 +36,32 @@
     <div class="frame">
         <div class="row">
             <label for="life_expectancy">Life Expectancy</label>
-            <input id="life_expectancy" type="text" value="80" name="life_expectancy"/>
+            <input id="life_expectancy" type="text" name="life_expectancy"
+                   title="Members life expectancy in Years"/>
             <span>Years</span>
         </div>
         <div class="row">
             <label for="growth">Growth</label>
-            <input id="growth" type="text" value="80" name="life_expectancy" disabled="disabled"/>
+            <input id="growth" type="text" name="growth" disabled="disabled"
+                    title="Monetary mass growth in percent per year based on members life expectancy (ev) : ln(ev/2)/(ev/2) * 100"/>
             <span>% / Year</span>
         </div>
         <div class="row">
             <label for="dividend_start">First Dividend</label>
-            <input id="dividend_start" type="text" value="1000" name="dividend_start"/>
+            <input id="dividend_start" type="text" name="dividend_start"
+            title="Firt dividend value in units"/>
             <span>Units</span>
         </div>
         <div class="row">
             <label for="money_duration">Money Duration</label>
-            <input id="money_duration" type="text" value="160" name="money_duration"/>
+            <input id="money_duration" type="text" name="money_duration" title="Duration of the money in years (chart X axis size)"/>
             <span>Years</span>
         </div>
         <input id="generate_button" type="button" value="Update" name="generate_button">
     </div>
     <div class="frame">
         <label for="new_account_birth">New member birth year</label><input id="new_account_birth" type="text"
-                                                                           value="1"/>
+                                                                           title="Set the year of birth of the next new member"/>
         <input id="add_account" type="button" value="New Member"/>
         <input id="delete_last_account" type="button" value="Delete Last Member"/>
     </div>
@@ -81,22 +84,28 @@
         this.dividend_start = 1000;
         this.money_duration = 160;
         this.reference_frame = 'quantitative_uda';
+        this.new_account_birth = 1;
 
+        // Fill the form
+        this.init = function () {
+            document.getElementById('life_expectancy').value = this.life_expectancy;
+            document.getElementById('dividend_start').value = this.dividend_start;
+            document.getElementById('money_duration').value = this.money_duration;
+            document.getElementById('new_account_birth').value = this.new_account_birth;
+        };
+
+        // Capture user entry
         this.get_data = function () {
             this.life_expectancy = parseInt(document.getElementById('life_expectancy').value);
             this.dividend_start = parseInt(document.getElementById('dividend_start').value);
             this.money_duration = parseInt(document.getElementById('money_duration').value);
+            this.new_account_birth = parseInt(document.getElementById('new_account_birth').value);
             this.reference_frame = document.getElementById('reference_frame').options[
                 document.getElementById('reference_frame').selectedIndex
                 ].value;
         };
 
-        this.init = function () {
-            document.getElementById('life_expectancy').value = this.life_expectancy;
-            document.getElementById('dividend_start').value = this.dividend_start;
-            document.getElementById('money_duration').value = this.money_duration;
-        };
-
+        // Create reference frame selector
         this.set_reference_frames = function (reference_frames) {
             document.getElementById('reference_frame').options = [];
             for (var index in Object.getOwnPropertyNames(reference_frames)) {
@@ -107,7 +116,7 @@
             }
         };
 
-        // update dynamic values in form
+        // Update dynamic values in form
         this.update = function () {
             // calculated growth
             document.getElementById('growth').value = (money.growth * 100).toFixed(2);
@@ -211,8 +220,11 @@
         // construct name
         var name = 'Member ' + (money.accounts.length + 1)
 
+        // capture user entry
+        money_form.get_data();
+
         // add a member account at the birth date specified
-        money.add_account(name, parseInt(document.getElementById('new_account_birth').value));
+        money.add_account(name, parseInt(money_form.new_account_birth));
 
         update();
     }
