@@ -32,7 +32,19 @@
 <!-- Add your site or application content here -->
 <div class="title">Relative Theory of Money Charts</div>
 
+<div id="chart_reference_frame" class="frame"></div>
+<div id="chart_percent_average" class="frame"></div>
+
 <form>
+    <div class="frame">
+        <label for="reference_frame">Reference Frame</label><select id="reference_frame" name="money_duration"></select>
+    </div>
+    <div class="frame">
+        <label for="new_account_birth">New member birth year</label><input id="new_account_birth" type="text"
+                                                                           title="Set the year of birth of the next new member"/>
+        <input id="add_account" type="button" value="New Member"/>
+        <input id="delete_last_account" type="button" value="Delete Last Member"/>
+    </div>
     <div class="frame">
         <div class="row">
             <label for="life_expectancy">Life Expectancy</label>
@@ -59,19 +71,7 @@
         </div>
         <input id="generate_button" type="button" value="Update" name="generate_button">
     </div>
-    <div class="frame">
-        <label for="new_account_birth">New member birth year</label><input id="new_account_birth" type="text"
-                                                                           title="Set the year of birth of the next new member"/>
-        <input id="add_account" type="button" value="New Member"/>
-        <input id="delete_last_account" type="button" value="Delete Last Member"/>
-    </div>
-    <div class="frame">
-        <label for="reference_frame">Reference Frame</label><select id="reference_frame" name="money_duration"></select>
-    </div>
-
 </form>
-
-<div id="chart" class="frame"></div>
 
 <script type="application/javascript">
 
@@ -148,8 +148,8 @@
     money_form.update();
 
     // create and display chart from data
-    chart = c3.generate({
-        bindto: '#chart',
+    chart_reference_frame = c3.generate({
+        bindto: '#chart_reference_frame',
         axis: {
             x: {
                 label: 'Year'
@@ -169,7 +169,29 @@
                 }
             }
         },
-        data: data
+        data: data.reference_frame
+    });
+
+    // create and display chart from data
+    chart_percent_average = c3.generate({
+        bindto: '#chart_percent_average',
+        axis: {
+            x: {
+                label: 'Year'
+            },
+            y: {
+                label: '% (M/N)'
+            }
+        },
+        tooltip: {
+            format: {
+                value: function (value, ratio, id, index) {
+                    var f = d3.format('.2f');
+                    return f(value);
+                }
+            }
+        },
+        data: data.percent_average
     });
 
     /**
@@ -187,7 +209,7 @@
         money.reference_frame = money_form.reference_frame;
 
         // Axes
-        chart.axis.labels({
+        chart_reference_frame.axis.labels({
             y: money.reference_frames[money.reference_frame].unit_label
         });
 
@@ -198,10 +220,12 @@
         money_form.update();
 
         // tell load command to unload old data
-        data.unload = true;
+        data.reference_frame.unload = true;
+        data.percent_average.unload = true;
 
         // reload data in chart
-        chart.load(data);
+        chart_reference_frame.load(data.reference_frame);
+        chart_percent_average.load(data.percent_average);
     }
 
     /**
