@@ -172,6 +172,9 @@
         data: data.reference_frame
     });
 
+    // Same color for members in chart_percent_average
+    data.percent_average.colors = chart_reference_frame.data.colors();
+
     // create and display chart from data
     chart_percent_average = c3.generate({
         bindto: '#chart_percent_average',
