@@ -55,18 +55,19 @@
         <div class="row">
             <label for="growth">Growth</label>
             <input id="growth" type="text" name="growth" disabled="disabled"
-                    title="Monetary mass growth in percent per year based on members life expectancy (ev) : ln(ev/2)/(ev/2) * 100"/>
+                   title="Monetary mass growth in percent per year based on members life expectancy (ev) : ln(ev/2)/(ev/2) * 100"/>
             <span>% / Year</span>
         </div>
         <div class="row">
             <label for="dividend_start">First Dividend</label>
             <input id="dividend_start" type="text" name="dividend_start"
-            title="Firt dividend value in units"/>
+                   title="Firt dividend value in units"/>
             <span>Units</span>
         </div>
         <div class="row">
             <label for="money_duration">Money Duration</label>
-            <input id="money_duration" type="text" name="money_duration" title="Duration of the money in years (chart X axis size)"/>
+            <input id="money_duration" type="text" name="money_duration"
+                   title="Duration of the money in years (chart X axis size)"/>
             <span>Years</span>
         </div>
         <input id="generate_button" type="button" value="Update" name="generate_button">
@@ -147,6 +148,9 @@
     // update dynamic values in form
     money_form.update();
 
+    // init chart_percent_average to declare onmouseover event
+    chart_percent_average = null;
+
     // create and display chart from data
     chart_reference_frame = c3.generate({
         bindto: '#chart_reference_frame',
@@ -166,6 +170,15 @@
                     }
                     var f = d3.format('.2f');
                     return f(value);
+                }
+            }
+        },
+        legend: {
+            item: {
+                // bind focus on the two charts
+                onmouseover: function (id) {
+                    chart_reference_frame.focus(id);
+                    chart_percent_average.focus(id);
                 }
             }
         },
@@ -191,6 +204,15 @@
                 value: function (value, ratio, id, index) {
                     var f = d3.format('.2f');
                     return f(value);
+                }
+            }
+        },
+        legend: {
+            item: {
+                // bind focus on the two charts
+                onmouseover: function (id) {
+                    chart_reference_frame.focus(id);
+                    chart_percent_average.focus(id);
                 }
             }
         },
