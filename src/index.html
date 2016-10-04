@@ -55,8 +55,9 @@
         <div class="row">
             <label for="growth">Growth</label>
             <input id="growth" type="text" name="growth" disabled="disabled"
-                   title="Monetary mass growth in percent per year based on members life expectancy (ev) : ln(ev/2)/(ev/2) * 100"/>
+                   title="Monetary mass growth in percent per year"/>
             <span>% / Year</span>
+            <input id="calculate_growth" type="checkbox" name="calculate_growth" value="1" checked="checked" title="Calculate growth from life expectancy (ev) : growth = ln(ev/2)/(ev/2) * 100">
         </div>
         <div class="row">
             <label for="dividend_start">First Dividend</label>
@@ -86,6 +87,8 @@
         this.money_duration = 160;
         this.reference_frame = 'quantitative_uda';
         this.new_account_birth = 1;
+        this.calculate_growth = true;
+        this.growth = 9.22;
 
         // Fill the form
         this.init = function () {
@@ -93,6 +96,8 @@
             document.getElementById('dividend_start').value = this.dividend_start;
             document.getElementById('money_duration').value = this.money_duration;
             document.getElementById('new_account_birth').value = this.new_account_birth;
+            document.getElementById('calculate_growth').checked = this.calculate_growth;
+            document.getElementById('growth').value = this.growth;
         };
 
         // Capture user entry
@@ -104,6 +109,10 @@
             this.reference_frame = document.getElementById('reference_frame').options[
                 document.getElementById('reference_frame').selectedIndex
                 ].value;
+            this.calculate_growth = document.getElementById('calculate_growth').checked;
+            if (!this.calculate_growth) {
+                this.growth = parseFloat(document.getElementById('growth').value);
+            }
         };
 
         // Create reference frame selector
@@ -232,7 +241,9 @@
         money.dividend_start = money_form.dividend_start;
         money.money_duration = money_form.money_duration;
         money.reference_frame = money_form.reference_frame;
-
+        money.calculate_growth = money_form.calculate_growth;
+        money.growth = money_form.growth / 100;
+        console.log(money_form.growth, money.growth);
         // Axes
         chart_reference_frame.axis.labels({
             y: money.reference_frames[money.reference_frame].unit_label
@@ -281,6 +292,13 @@
         update();
     }
 
+    document.getElementById('calculate_growth').addEventListener('change', function () {
+        if (document.getElementById('calculate_growth').checked) {
+            document.getElementById('growth').setAttribute('disabled', 'disabled');
+        } else {
+            document.getElementById('growth').removeAttribute('disabled');
+        }
+    });
     document.getElementById('generate_button').addEventListener('click', update);
     document.getElementById('reference_frame').addEventListener('change', update);
 

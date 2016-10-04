@@ -16,6 +16,8 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     this.money_duration = money_duration || this.life_expectancy * 2;
 
     this.growth = 0;
+    // Calculate growth from life expectancy
+    this.calculate_growth = true;
     this.accounts = [];
     this.reference_frames = {
         'quantitative_uda': {
@@ -142,9 +144,12 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         this.reset_monetary_mass();
         this.reset_average();
 
-        // calculate growth
-        this.calc_growth();
-
+        if (this.calculate_growth) {
+            console.log("calculate growth");
+            // calculate growth
+            this.calc_growth();
+        }
+        console.log("growrth", this.growth);
         // create c3.js data object
 		var data = {
             reference_frame: {
