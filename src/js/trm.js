@@ -1,7 +1,23 @@
 /**
  * Class of libre money chart generator
  *
- * Use the call() API to create instance as explained here :
+ * Create instance context:
+ *
+ *      var myMoney = {};
+ *
+ * Create instance of class in context with constructor parameters
+ *
+ *      libre_money_class.call(myMoney, 80);
+ *
+ * Add a member account:
+ *
+ *      myMoney.add_account('moi', 1);
+ *
+ * Debug c3.js chart data
+ *
+ *      console.log(myMoney.get_data());
+ *
+ * More infos:
  *
  * https://javascriptweblog.wordpress.com/2010/12/07/namespacing-in-javascript/
  *
@@ -71,6 +87,33 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     };
 
     this.reference_frame = 'quantitative_uda';
+
+    // dididend formulae
+    this.dividend_formulae = {
+        'UDA': {
+            calculate: function (growth, dividend, monetary_mass, people) {
+                if (people > 0) {
+                    return Math.max(dividend, growth * (monetary_mass / people));
+                } else {
+                    return dividend;
+                }
+            }
+        },
+        'UDB': {
+            calculate: function (growth, dividend, monetary_mass, people) {
+                return Math.ceil(dividend * (1 + growth));
+            }
+        },
+        'UDG': {
+            calculate: function (growth, dividend, monetary_mass, people) {
+                if (people > 0) {
+                    return dividend + (Math.pow(growth, 2) * (monetary_mass / people));
+                } else {
+                    return dividend;
+                }
+            }
+        }
+    };
 
     this.reset_dividends = function () {
         this.dividends = {x: [], y : [], display_y: []};
@@ -207,24 +250,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
             // after first issuance, increase dividend by growth...
             if (index > 1) {
-
-                // UDA formula
-                if (this.reference_frames[this.reference_frame].formula == 'UDA') {
-                    if (people > 0) {
-                        dividend = Math.max(this.dividends.y[this.dividends.y.length - 1], this.growth * (this.monetary_mass.y[this.monetary_mass.y.length - 1] / people));
-                    } else {
-                        dividend = this.dividends.y[this.dividends.y.length - 1];
-                    }
-                    // UDB formula
-                } else if (this.reference_frames[this.reference_frame].formula == 'UDB') {
-                    dividend = Math.ceil(this.dividends.y[this.dividends.y.length - 1] * (1 + this.growth));
-                } else if (this.reference_frames[this.reference_frame].formula == 'UDG') {
-                    if (people > 0) {
-                        dividend = this.dividends.y[this.dividends.y.length - 1] + (Math.pow(this.growth, 2) * (this.monetary_mass.y[this.monetary_mass.y.length - 1] / people))
-                    } else {
-                        dividend = this.dividends.y[this.dividends.y.length - 1];
-                    }
-                }
+                // calculate next dividend depending on formula...
+                dividend = this.dividend_formulae[this.reference_frames[this.reference_frame].formula].calculate(
+                    this.growth,
+                    this.dividends.y[this.dividends.y.length - 1],
+                    this.monetary_mass.y[this.monetary_mass.y.length - 1],
+                    people
+                );
             }
 
             this.dividends.y.push(dividend);
@@ -321,7 +353,6 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             data.percent_average.columns.push(this.accounts[index_account].x);
             data.percent_average.columns.push(this.accounts[index_account].percent_average_y);
         }
-        console.log(data);
 		return data;
     };
 
@@ -336,18 +367,3 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     }
 
 };
-
-/**
-// Create instance context
-var myMoney = {};
-// Create instance of class in context with constructor parameters
-libre_money_class.call(myMoney, 80);
-
-// add a member account
-myMoney.add_account('moi', 1);
-
-// debug c3.js chart data
-console.log(myMoney.get_data());
-
-//console.log(myMoney);
-**/
