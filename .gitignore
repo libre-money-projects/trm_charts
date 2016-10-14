@@ -1,5 +1,1 @@
-archive
-node_modules
 .idea
-dist
-!dist/.gitkeep
