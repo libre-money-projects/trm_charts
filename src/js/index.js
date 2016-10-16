@@ -9,7 +9,8 @@ gui_form_class = function () {
     this.life_expectancy = 80;
     this.dividend_start = 1000;
     this.money_duration = 160;
-    this.reference_frame = 'quantitative_uda';
+    this.reference_frame = 'quantitative';
+    this.formula_type = 'uda';
     this.new_account_birth = 1;
     this.calculate_growth = true;
     this.growth = 9.22;
@@ -33,6 +34,9 @@ gui_form_class = function () {
         this.reference_frame = document.getElementById('reference_frame').options[
             document.getElementById('reference_frame').selectedIndex
             ].value;
+        this.formula_type = document.getElementById('formula_type').options[
+            document.getElementById('formula_type').selectedIndex
+            ].value;
         this.calculate_growth = document.getElementById('calculate_growth').checked;
         if (!this.calculate_growth) {
             this.growth = parseFloat(document.getElementById('growth').value);
@@ -45,7 +49,18 @@ gui_form_class = function () {
         for (var index in Object.getOwnPropertyNames(reference_frames)) {
             var key = Object.getOwnPropertyNames(reference_frames)[index];
             document.getElementById('reference_frame').add(
-                new Option(reference_frames[key].name, key)
+                new Option(reference_frames[key], key)
+            );
+        }
+    };
+
+    // Create formula selector
+    this.set_formula_selector = function (dividend_formulaes) {
+        document.getElementById('formula_type').options = [];
+        for (var index in Object.getOwnPropertyNames(dividend_formulaes)) {
+            var key = Object.getOwnPropertyNames(dividend_formulaes)[index];
+            document.getElementById('formula_type').add(
+                new Option(dividend_formulaes[key].name, key)
             );
         }
     };
@@ -72,6 +87,9 @@ libre_money_class.call(money, money_form.life_expectancy, money_form.dividend_st
 // capture reference_frames list
 money_form.set_reference_frames(money.reference_frames);
 
+// capture formulaes list
+money_form.set_formula_selector(money.dividend_formulae);
+
 // add a member account
 money.add_account('Member 1', 1);
 
@@ -92,7 +110,7 @@ chart_reference_frame = c3.generate({
             label: 'Year'
         },
         y: {
-            label: money.reference_frames[money.reference_frame].unit_label
+            label: money.plot_hub[money.reference_frame + '_' + money.formula_type].unit_label
         }
     },
     tooltip: {
@@ -165,12 +183,13 @@ function update() {
     money.dividend_start = money_form.dividend_start;
     money.money_duration = money_form.money_duration;
     money.reference_frame = money_form.reference_frame;
+    money.formula_type = money_form.formula_type;
     money.calculate_growth = money_form.calculate_growth;
     money.growth = money_form.growth / 100;
     console.log(money_form.growth, money.growth);
     // Axes
     chart_reference_frame.axis.labels({
-        y: money.reference_frames[money.reference_frame].unit_label
+        y: money.plot_hub[money.reference_frame + '_' + money.formula_type].unit_label
     });
 
     // calculate data
@@ -225,6 +244,7 @@ document.getElementById('calculate_growth').addEventListener('change', function 
 });
 document.getElementById('generate_button').addEventListener('click', update);
 document.getElementById('reference_frame').addEventListener('change', update);
+document.getElementById('formula_type').addEventListener('change', update);
 
 document.getElementById('add_account').addEventListener('click', add_account);
 document.getElementById('delete_last_account').addEventListener('click', delete_last_account);

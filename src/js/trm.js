@@ -35,8 +35,8 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     // Calculate growth from life expectancy
     this.calculate_growth = true;
     this.accounts = [];
-    this.reference_frames = {
-        'quantitative_uda': {
+    this.plot_hub = {
+        'quantitative_UDA': {
             name: "Quantitative UDA",
             formula: "UDA",
             unit_label: 'Units',
@@ -44,7 +44,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 return value;
             }
         },
-        'quantitative_udb': {
+        'quantitative_UDB': {
             name: "Quantitative UDB",
             formula: "UDB",
             unit_label: 'Units',
@@ -52,7 +52,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 return value;
             }
         },
-        'quantitative_udg': {
+        'quantitative_UDG': {
             name: "Quantitative UDĞ",
             formula: "UDG",
             unit_label: 'Units',
@@ -60,7 +60,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 return value;
             }
         },
-        'relative_uda_t': {
+        'relative_UDA': {
             name: "Relative UDA(t)",
             formula: "UDA",
             unit_label: 'UDA(t)',
@@ -68,7 +68,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 return value / money.dividends.y[money.dividends.y.length - 1];
             }
         },
-        'relative_udb_t': {
+        'relative_UDB': {
             name: "Relative UDB(t)",
             formula: "UDB",
             unit_label: 'UDB(t)',
@@ -76,7 +76,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 return value / money.dividends.y[money.dividends.y.length - 1];
             }
         },
-        'relative_udg_t': {
+        'relative_UDG': {
             name: "Relative UDĞ(t)",
             formula: "UDG",
             unit_label: 'UDĞ(t)',
@@ -86,30 +86,43 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         }
     };
 
-    this.reference_frame = 'quantitative_uda';
+    this.reference_frames = {
+        'quantitative': 'Quantitative',
+        'relative': 'Relative'
+    };
+
+    this.reference_frame = 'quantitative';
+    this.formula_type = 'UDA';
 
     // dididend formulae
     this.dividend_formulae = {
         'UDA': {
-            calculate: function (growth, dividend, monetary_mass, people) {
-                if (people > 0) {
-                    return Math.max(dividend, growth * (monetary_mass / people));
+            name: "UDA(t) = max[UDA(t-1);c*M(t-1)/N(t)]",
+            calculate: function (growth, previous_dividend, previous_monetary_mass, previous_people, current_people) {
+                if (current_people > 0) {
+                    return Math.max(previous_dividend, growth * (previous_monetary_mass / current_people));
                 } else {
-                    return dividend;
+                    return previous_dividend;
                 }
             }
         },
         'UDB': {
-            calculate: function (growth, dividend, monetary_mass, people) {
-                return Math.ceil(dividend * (1 + growth));
+            name: "UDB(t) = (1+c)*UDB(t-1)",
+            calculate: function (growth, previous_dividend, previous_monetary_mass, previous_people, current_people) {
+                if (current_people > 0) {
+                    return Math.ceil(previous_dividend * (1 + growth));
+                } else {
+                    return previous_dividend;
+                }
             }
         },
         'UDG': {
-            calculate: function (growth, dividend, monetary_mass, people) {
-                if (people > 0) {
-                    return dividend + (Math.pow(growth, 2) * (monetary_mass / people));
+            name: "UDĞ(t) = UDĞ(t-1) + c²*M(t-1)/N(t-1)",
+            calculate: function (growth, previous_dividend, previous_monetary_mass, previous_people, current_people) {
+                if (previous_people > 0) {
+                    return previous_dividend + (Math.pow(growth, 2) * (previous_monetary_mass / previous_people));
                 } else {
-                    return dividend;
+                    return previous_dividend;
                 }
             }
         }
@@ -233,6 +246,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 		}
 
         var dividend = this.dividend_start;
+        var previous_people = 0;
         var people = 0;
         var monetary_mass = 0;
         var average = 0;
@@ -245,19 +259,23 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             this.monetary_mass.x.push(index);
             this.average.x.push(index);
 
-            // get current people count
-            people = this.get_people(index);
-
             // after first issuance, increase dividend by growth...
             if (index > 1) {
+                previous_people = people;
+                people = this.get_people(index);
                 // calculate next dividend depending on formula...
-                dividend = this.dividend_formulae[this.reference_frames[this.reference_frame].formula].calculate(
+                dividend = this.dividend_formulae[this.plot_hub[this.reference_frame + '_' + this.formula_type].formula].calculate(
                     this.growth,
                     this.dividends.y[this.dividends.y.length - 1],
                     this.monetary_mass.y[this.monetary_mass.y.length - 1],
-                    people
+                    people,
+                    previous_people
                 );
             }
+            else {
+                people = this.get_people(index);
+            }
+                
 
             this.dividends.y.push(dividend);
             this.dividends.display_y.push(this.get_reference_frame_value(dividend));
@@ -363,7 +381,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
      * @returns {number|*}
      */
     this.get_reference_frame_value = function (value) {
-        return this.reference_frames[this.reference_frame].transform(this, value);
+        return this.plot_hub[this.reference_frame + '_' + this.formula_type].transform(this, value);
     }
 
 };
