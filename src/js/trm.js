@@ -126,9 +126,9 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
     };
 
     this.reference_frames = {
-        'quantitative': 'Quantitative',
-        'relative': 'Relative',
-        'average': 'Average'
+        'quantitative': 'Monetary Unit',
+        'relative': 'Dividend',
+        'average': '% (M/N)'
     };
 
     this.reference_frame = 'quantitative';
