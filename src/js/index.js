@@ -99,12 +99,12 @@ var data = money.get_data();
 // update dynamic values in form
 money_form.update();
 
-// init chart_percent_average to declare onmouseover event
-chart_percent_average = null;
-
 // create and display chart from data
-chart_reference_frame = c3.generate({
-    bindto: '#chart_reference_frame',
+chart_reference_frame1 = c3.generate({
+    padding: {
+        right: 50 // We try to align the axes of the two plots
+    },
+    bindto: '#chart_reference_frame1',
     axis: {
         x: {
             label: 'Year'
@@ -128,31 +128,34 @@ chart_reference_frame = c3.generate({
         item: {
             // bind focus on the two charts
             onmouseover: function (id) {
-                chart_reference_frame.focus(id);
-                chart_percent_average.focus(id);
+                chart_reference_frame1.focus(id);
             }
         }
     },
-    data: data.reference_frame
+    data: data.reference_frame1
 });
 
-// Same color for members in chart_percent_average
-data.percent_average.colors = chart_reference_frame.data.colors();
-
 // create and display chart from data
-chart_percent_average = c3.generate({
-    bindto: '#chart_percent_average',
+chart_reference_frame2 = c3.generate({
+    bindto: '#chart_reference_frame2',
     axis: {
         x: {
             label: 'Year'
         },
         y: {
-            label: '% (M/N)'
+            label: money.plot_hub[money.reference_frame + '_' + money.formula_type].unit_label
+        },
+        y2: {
+            label: 'People',
+            show: true
         }
     },
     tooltip: {
         format: {
             value: function (value, ratio, id, index) {
+                if (id == 'people') {
+                    return value;
+                }
                 var f = d3.format('.2f');
                 return f(value);
             }
@@ -162,12 +165,14 @@ chart_percent_average = c3.generate({
         item: {
             // bind focus on the two charts
             onmouseover: function (id) {
-                chart_reference_frame.focus(id);
-                chart_percent_average.focus(id);
+                chart_reference_frame2.focus(id);
             }
         }
     },
-    data: data.percent_average
+    data: data.reference_frame2,
+    color: {
+        pattern: ['#d62728', '#ff9896', '#9467bd']
+    }
 });
 
 /**
@@ -188,7 +193,10 @@ function update() {
     money.growth = money_form.growth / 100;
     console.log(money_form.growth, money.growth);
     // Axes
-    chart_reference_frame.axis.labels({
+    chart_reference_frame1.axis.labels({
+        y: money.plot_hub[money.reference_frame + '_' + money.formula_type].unit_label
+    });
+    chart_reference_frame2.axis.labels({
         y: money.plot_hub[money.reference_frame + '_' + money.formula_type].unit_label
     });
 
@@ -199,12 +207,12 @@ function update() {
     money_form.update();
 
     // tell load command to unload old data
-    data.reference_frame.unload = true;
-    data.percent_average.unload = true;
+    data.reference_frame1.unload = true;
+    data.reference_frame2.unload = true;
 
     // reload data in chart
-    chart_reference_frame.load(data.reference_frame);
-    chart_percent_average.load(data.percent_average);
+    chart_reference_frame1.load(data.reference_frame1);
+    chart_reference_frame2.load(data.reference_frame2);
 }
 
 /**

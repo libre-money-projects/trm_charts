@@ -40,7 +40,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             name: "Quantitative UDA",
             formula: "UDA",
             unit_label: 'Units',
-            transform: function(money, value) {
+            transform: function(money, value, index) {
                 return value;
             }
         },
@@ -48,7 +48,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             name: "Quantitative UDB",
             formula: "UDB",
             unit_label: 'Units',
-            transform: function(money, value) {
+            transform: function(money, value, index) {
                 return value;
             }
         },
@@ -56,7 +56,7 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             name: "Quantitative UDĞ",
             formula: "UDG",
             unit_label: 'Units',
-            transform: function(money, value) {
+            transform: function(money, value, index) {
                 return value;
             }
         },
@@ -64,31 +64,71 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             name: "Relative UDA(t)",
             formula: "UDA",
             unit_label: 'UDA(t)',
-            transform: function(money, value) {
-                return value / money.dividends.y[money.dividends.y.length - 1];
+            transform: function(money, value, index) {
+                return value / money.dividends.y[index];
             }
         },
         'relative_UDB': {
             name: "Relative UDB(t)",
             formula: "UDB",
             unit_label: 'UDB(t)',
-            transform: function(money, value) {
-                return value / money.dividends.y[money.dividends.y.length - 1];
+            transform: function(money, value, index) {
+                return value / money.dividends.y[index];
             }
         },
         'relative_UDG': {
             name: "Relative UDĞ(t)",
             formula: "UDG",
             unit_label: 'UDĞ(t)',
-            transform: function(money, value) {
-                return value / money.dividends.y[money.dividends.y.length - 1];
+            transform: function(money, value, index) {
+                return value / money.dividends.y[index];
+            }
+        },
+        'average_UDA': {
+            name: "% (M/N) UDA(t)",
+            formula: "UDA",
+            unit_label: '% (M/N)',
+            transform: function(money, value, index) {
+                if (money.average.y[index] > 0) {
+                    return (value / money.average.y[index]) * 100;
+                }
+                else {
+                    return 0;
+                }
+            }
+        },
+        'average_UDB': {
+            name: "% (M/N) UDB(t)",
+            formula: "UDB",
+            unit_label: '% (M/N)',
+            transform: function(money, value, index) {
+                if (money.average.y[index] > 0) {
+                    return (value / money.average.y[index]) * 100;
+                }
+                else {
+                    return 0;
+                }
+            }
+        },
+        'average_UDG': {
+            name: "% (M/N) UDĞ(t)",
+            formula: "UDG",
+            unit_label: '% (M/N)',
+            transform: function(money, value, index) {
+                if (money.average.y[index] > 0) {
+                    return (value / money.average.y[index]) * 100;
+                }
+                else {
+                    return 0;
+                }
             }
         }
     };
 
     this.reference_frames = {
         'quantitative': 'Quantitative',
-        'relative': 'Relative'
+        'relative': 'Relative',
+        'average': 'Average'
     };
 
     this.reference_frame = 'quantitative';
@@ -176,7 +216,6 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
             x: [],
             y: [],
             display_y: [],
-            percent_average_y: []
         });
 	};
 
@@ -208,25 +247,35 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         console.log("growrth", this.growth);
         // create c3.js data object
 		var data = {
-            reference_frame: {
+            reference_frame1: {
+                xs: {
+                    'average': 'x_average'
+                },
+                names: {
+                    'average': 'Average'
+                },
+                columns: [],
+                types: {
+                    average: 'area',
+                }
+            },
+            reference_frame2: {
                 xs: {
                     'dividend': 'x_dividend',
                     'people': 'x_people',
-                    'monetary_mass': 'x_monetary_mass',
-                    'average': 'x_average'
+                    'monetary_mass': 'x_monetary_mass'
                 },
                 names: {
                     'dividend': 'Dividend',
                     'people': 'People',
-                    'monetary_mass': 'Monetary Mass',
-                    'average': 'Average'
+                    'monetary_mass': 'Monetary Mass'
                 },
-                columns: []
-            },
-            percent_average: {
-                xs: {},
-                names: {},
-                columns: []
+                columns: [],
+                axes: {
+                    dividend: 'y',
+                    monetary_mass: 'y',
+                    people: 'y2'
+                }
             }
         };
 
@@ -234,15 +283,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         // For each account...
 		for (index_account = 0; index_account < this.accounts.length; index_account++) {
 			// add axis mapping
-			data.reference_frame.xs[this.accounts[index_account].id] = 'x_' + this.accounts[index_account].name;
-            data.percent_average.xs[this.accounts[index_account].id] = 'x_' + this.accounts[index_account].name;
+			data.reference_frame1.xs[this.accounts[index_account].id] = 'x_' + this.accounts[index_account].name;
 
             // reset data
             this.accounts[index_account].balance = 0;
             this.accounts[index_account].x = [];
             this.accounts[index_account].y = [];
             this.accounts[index_account].display_y = [];
-            this.accounts[index_account].percent_average_y = [];
 		}
 
         var dividend = this.dividend_start;
@@ -278,15 +325,13 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                 
 
             this.dividends.y.push(dividend);
-            this.dividends.display_y.push(this.get_reference_frame_value(dividend));
 
             monetary_mass = 0;
             average = 0;
             // for each account...
             for (index_account = 0; index_account < this.accounts.length; index_account++) {
 
-                data.reference_frame.names[this.accounts[index_account].id] = this.accounts[index_account].name;
-                data.percent_average.names[this.accounts[index_account].id] = this.accounts[index_account].name;
+                data.reference_frame1.names[this.accounts[index_account].id] = this.accounts[index_account].name;
 
                 // if account is born...
                 if (index >= this.accounts[index_account].birth) {
@@ -299,8 +344,6 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
                     this.accounts[index_account].x.push(index);
                     // add y value
                     this.accounts[index_account].y.push(this.accounts[index_account].balance);
-                    // add display_y value
-                    this.accounts[index_account].display_y.push(this.get_reference_frame_value(this.accounts[index_account].balance));
                 }
                 // increment monetary mass
                 monetary_mass += this.accounts[index_account].balance;
@@ -314,28 +357,30 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
 
             // add monetary_mass
             this.monetary_mass.y.push(monetary_mass);
-            this.monetary_mass.display_y.push(this.get_reference_frame_value(monetary_mass));
 
             // add average
             this.average.y.push(average);
-            this.average.display_y.push(this.get_reference_frame_value(average));
+		}
+
+		for (index = 1; index <= this.money_duration; index++) {
+
+            this.dividends.display_y.push(this.get_reference_frame_value(this.dividends.y[index-1], index-1));
 
             // for each account...
             for (index_account = 0; index_account < this.accounts.length; index_account++) {
 
                 // if account is born...
                 if (index >= this.accounts[index_account].birth) {
-                    if (this.average.y[this.average.y.length - 1] > 0) {
-                        // add percent_average_y value
-                        this.accounts[index_account].percent_average_y.push(
-                            (this.accounts[index_account].balance / this.average.y[this.average.y.length - 1]) * 100
-                        );
-                    } else {
-                        // add 0 to percent_average_y value
-                        this.accounts[index_account].percent_average_y.push(0);
-                    }
+                    // add display_y value
+                    this.accounts[index_account].display_y.push(this.get_reference_frame_value(this.accounts[index_account].y[index-this.accounts[index_account].birth], index-1));
                 }
             }
+
+            // add monetary_mass
+            this.monetary_mass.display_y.push(this.get_reference_frame_value(this.monetary_mass.y[index-1], index-1));
+
+            // add average
+            this.average.display_y.push(this.get_reference_frame_value(this.average.y[index-1], index-1));
 		}
 
         // add axis header to data
@@ -349,27 +394,24 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
         this.average.display_y.unshift('average');
 
         // add data to columns
-        data.reference_frame.columns.push(this.dividends.x);
-        data.reference_frame.columns.push(this.dividends.display_y);
-        data.reference_frame.columns.push(this.people.x);
-        data.reference_frame.columns.push(this.people.y);
-        data.reference_frame.columns.push(this.monetary_mass.x);
-        data.reference_frame.columns.push(this.monetary_mass.display_y);
-        data.reference_frame.columns.push(this.average.x);
-        data.reference_frame.columns.push(this.average.display_y);
+        data.reference_frame2.columns.push(this.dividends.x);
+        data.reference_frame2.columns.push(this.dividends.display_y);
+        data.reference_frame2.columns.push(this.people.x);
+        data.reference_frame2.columns.push(this.people.y);
+        data.reference_frame2.columns.push(this.monetary_mass.x);
+        data.reference_frame2.columns.push(this.monetary_mass.display_y);
+        data.reference_frame1.columns.push(this.average.x);
+        data.reference_frame1.columns.push(this.average.display_y);
 
         // for each account...
         for (index_account = 0; index_account < this.accounts.length; index_account++) {
             // add axis header to data
-            this.accounts[index_account].x.unshift(data.reference_frame.xs[this.accounts[index_account].id]);
+            this.accounts[index_account].x.unshift(data.reference_frame1.xs[this.accounts[index_account].id]);
             this.accounts[index_account].y.unshift(this.accounts[index_account].id);
             this.accounts[index_account].display_y.unshift(this.accounts[index_account].id);
-            this.accounts[index_account].percent_average_y.unshift(this.accounts[index_account].id);
             // add data to columns
-            data.reference_frame.columns.push(this.accounts[index_account].x);
-            data.reference_frame.columns.push(this.accounts[index_account].display_y);
-            data.percent_average.columns.push(this.accounts[index_account].x);
-            data.percent_average.columns.push(this.accounts[index_account].percent_average_y);
+            data.reference_frame1.columns.push(this.accounts[index_account].x);
+            data.reference_frame1.columns.push(this.accounts[index_account].display_y);
         }
 		return data;
     };
@@ -380,8 +422,8 @@ var libre_money_class = function(life_expectancy, dividend_start, money_duration
      * @param value {int}   Source value
      * @returns {number|*}
      */
-    this.get_reference_frame_value = function (value) {
-        return this.plot_hub[this.reference_frame + '_' + this.formula_type].transform(this, value);
+    this.get_reference_frame_value = function (value, index) {
+        return this.plot_hub[this.reference_frame + '_' + this.formula_type].transform(this, value, index);
     }
 
 };
