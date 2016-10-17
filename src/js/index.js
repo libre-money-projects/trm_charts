@@ -99,6 +99,8 @@ var data = money.get_data();
 // update dynamic values in form
 money_form.update();
 
+var transition_duration = 4000;
+
 // create and display chart from data
 chart_reference_frame1 = c3.generate({
     padding: {
@@ -132,7 +134,10 @@ chart_reference_frame1 = c3.generate({
             }
         }
     },
-    data: data.reference_frame1
+    data: data.reference_frame1,
+    transition: {
+        duration: transition_duration
+    }
 });
 
 // create and display chart from data
@@ -172,13 +177,16 @@ chart_reference_frame2 = c3.generate({
     data: data.reference_frame2,
     color: {
         pattern: ['#d62728', '#ff9896', '#9467bd']
+    },
+    transition: {
+        duration: transition_duration
     }
 });
 
 /**
  * Update chart data
  */
-function update() {
+function update(toUnload) {
 
     // capture form values
     money_form.get_data();
@@ -207,8 +215,10 @@ function update() {
     money_form.update();
 
     // tell load command to unload old data
-    data.reference_frame1.unload = true;
-    data.reference_frame2.unload = true;
+    if (toUnload) {
+        data.reference_frame1.unload = toUnload;
+        data.reference_frame2.unload = toUnload;
+    }
 
     // reload data in chart
     chart_reference_frame1.load(data.reference_frame1);
@@ -223,7 +233,7 @@ function delete_last_account() {
     // If account deleted...
     if (account != false) {
         // Update remaining data
-        update();
+        update(account.id);
     }
 }
 
